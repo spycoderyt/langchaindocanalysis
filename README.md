@@ -27,10 +27,15 @@ Interface is designed with Streamlit, and a version of this application without 
 
 # References  🔗
 LG Chain used: [ConversationalRetrievalChain](https://python.langchain.com/en/latest/modules/chains/index_examples/chat_vector_db.html)
+
 Inspiration: [nicknochnack's Leveraging Your Own Documents in a Langchain Pipeline](https://github.com/nicknochnack/LangchainDocuments)
+
 [Langchain Library](https://github.com/langchain/langchain)
+
 [GCP Credentials](https://cloud.google.com/docs/authentication/getting-started)
+
 [Streamlit](https://streamlit.io/docs/)
+
 [OpenAI API](https://beta.openai.com/docs/)
 
 

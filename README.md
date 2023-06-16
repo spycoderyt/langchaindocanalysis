@@ -11,8 +11,8 @@ Interface is designed with Streamlit, and a version of this application without 
 # Startup 🚀
 1. Create a virtual environment `python -m venv lcdocsenv`
 2. Activate it:
-- - Windows:`.\lcdocsenv\Scripts\activate`
-- - Mac:  `source lcdocsenv/bin/activate`
+  - Windows:`.\lcdocsenv\Scripts\activate`
+  - Mac:  `source lcdocsenv/bin/activate`
 3. Clone this repo: `git clone https://github.com/spycoderyt/langchaindocanalysis`
 4. Go into the directory `cd langchaindocanalysis`
 5. Install necessary Python packages using pip:  `pip install -r requirements.txt `

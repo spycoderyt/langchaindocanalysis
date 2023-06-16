@@ -3,6 +3,21 @@
 Documentation to help setup and run the LangChain Document Analysis App. The app uses langchain ConversationalRetrievalChain with ChromaDB and PyPDF2 to load, store, and analyze pdf files. Google Docslinks are also supported with GoogleDriveLoader from LangChain, requiring additional setup via OAuth2. 
 
 Interface is designed with Streamlit, and a version of this application without Google Docs support is [publically deployed](https://spycoderyt-langchaindocanalysis-streamlit-app-fmgu30.streamlit.app/). As of this point, Google Docs support is only available on the locally hosted version (due to needing to generate a credentials.json and token.json file for OAuth2), but I will try to make it publicly deployed ASAP! 
+graph TD
+  A[Start] --> B[Initialize Session States]
+  B --> C[Render User Interface]
+  C -->|Enter OpenAI Key| D[Process OpenAI Key]
+  D --> E[Check User Input]
+  C -->|Upload File| F[Load PDF Files]
+  F --> E
+  C -->|Enter Google Docs URL| G[Load Google Docs]
+  G --> E
+  E -->|Enter a Prompt| H{API Key Entered?}
+  H -->|Yes| I[Process Entered Prompt]
+  I --> J[Show Past Queries and Answers]
+  H -->|No| K[Show Error Message]
+  K --> J
+  J --> L[End]
 
 # Prerequisites 
 - Python 3.6 or later 

@@ -26,6 +26,7 @@ Interface is designed with Streamlit, and a version of this application without 
 6. Start the app `streamlit run streamlit_app.py`
 # Customization
 - You can change the OpenAI GPT Model in line 41 of streamlit_app.py.
+- Feel free to send a pull req
 # References  🔗
 LG Chain used: [ConversationalRetrievalChain](https://python.langchain.com/en/latest/modules/chains/index_examples/chat_vector_db.html)
 
@@ -39,4 +40,5 @@ Inspiration: [nicknochnack's Leveraging Your Own Documents in a Langchain Pipeli
 
 [OpenAI API](https://beta.openai.com/docs/)
 
-
+# Info
+👨🏾‍💻 Author: Jirat Chiaranaipanich

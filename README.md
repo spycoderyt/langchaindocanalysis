@@ -24,7 +24,8 @@ Interface is designed with Streamlit, and a version of this application without 
 4. Move the secret credentials .json file to the `langchaindocanalysis` directory
 5. Run the script to generate a token.json file `python setup_gdrive_api.py`. You won't have to sign-in again as long as this file exists in your project directory.
 6. Start the app `streamlit run streamlit_app.py`
-
+# Customization
+- You can change the OpenAI GPT Model in line 41 of streamlit_app.py.
 # References  🔗
 LG Chain used: [ConversationalRetrievalChain](https://python.langchain.com/en/latest/modules/chains/index_examples/chat_vector_db.html)
 

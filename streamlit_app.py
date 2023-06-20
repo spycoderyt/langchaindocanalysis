@@ -38,12 +38,13 @@ def create_empty_pdf():
 
     return temp_path
 def make_qa():
-    st.session_state.qa = ConversationalRetrievalChain.from_llm(llm=OpenAI(model_name ="gpt-3.5-turbo-16k",temperature=0), retriever=st.session_state.store.as_retriever(), memory=st.session_state.memory,verbose = True)
+    memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
+    st.session_state.qa = ConversationalRetrievalChain.from_llm(OpenAI(model_name ="gpt-3.5-turbo-16k",temperature=1), st.session_state.store.as_retriever(), memory=memory,verbose = True)
 def load_data(uploaded_files):
     # Initialize an empty Chroma store
     st.session_state.file_uploaded = True
     st.spinner(text="Received document {uploaded_file.name}...")    
-    
+    st.session_state.cnt = 0
     for uploaded_file in uploaded_files:
         with tempfile.NamedTemporaryFile(delete=False) as temp_file:
             temp_file.write(uploaded_file.getvalue())
@@ -53,11 +54,12 @@ def load_data(uploaded_files):
         docs = loader.load_and_split()
         # Add documents to the existing Chroma store
         st.write(f"Processing file: {uploaded_file.name}")
-        if 'store' not in st.session_state:
+        if st.session_state.cnt==0:
             st.session_state.store = Chroma.from_documents(docs, st.session_state.embeddings)
         else:
             st.session_state.store.add_documents(docs)
         st.write(f"Document {uploaded_file.name} added!")
+        st.session_state.cnt+=1
 def extract_id(url):
     parsed_url = urlparse(url)
     if 'google.com' in parsed_url.netloc:
@@ -81,11 +83,13 @@ def load_google_docs(urls):
             token_path='token.json'
         )
         docs = loader.load()
-        if 'store' not in st.session_state:
+        if st.session_state.cnt==0:
             st.session_state.store = Chroma.from_documents(docs,st.session_state.embeddings)
         else:
             st.session_state.store.add_documents(docs)
             st.write("Document added!")
+        st.session_state.cnt+=1
+    
 
 def process_openai_key(OPENAI_API_KEY):
     st.session_state.thekey = OPENAI_API_KEY
@@ -97,28 +101,28 @@ def init():
         st.session_state.past_queries = []
     if 'past_answers' not in st.session_state:
         st.session_state.past_answers = []
-    st.session_state.key_entered = False
-    st.session_state.file_uploaded = False
+    if 'key_entered' not in st.session_state:
+        st.session_state.key_entered = False
+    if 'file_uploaded' not in st.session_state:
+        st.session_state.file_uploaded = False
     if 'chat_history' not in st.session_state:
         st.session_state.chat_history = []
-    st.session_state.cnt = 1
+    st.session_state.cnt = 0
     if 'prev_file_upload' not in st.session_state:
         st.session_state.prev_file_upload = None
     if 'prev_url' not in st.session_state:
         st.session_state.prev_url = None
-    if 'memory' not in st.session_state:
-        st.session_state.memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
-        
+    if 'cnt' not in st.session_state:
+        st.session_state.cnt = 0
 def process_key_entered(prompt):
-    make_qa()
     response=""
     if(st.session_state.file_uploaded):
-        res = st.session_state.qa({"question":prompt})
+        
+        res = st.session_state.qa({"question":prompt,"chat_history":st.session_state.chat_history})
         response = res["answer"]
-        with st.expander('Document Similarity Search'):
-            search = st.session_state.store.similarity_search_with_score(prompt) 
-            st.write(search[0][0].page_content) 
+        
     else:
+        st.write('there were no files uploaded :(')
         return
     
     st.session_state.chat_history.append("This is the user's query number {st.session_state.cnt}")
@@ -138,43 +142,48 @@ def main():
     init()
     st.title('🦜🔗 Langchain Document Analytics')
     st.markdown('[Documentation/Github](https://github.com/spycoderyt/langchaindocanalysis)')
-    if st.button('reset the bot'):
-        make_qa()
-
-    c1,c2 = st.columns(2)
-    with c1:
-        prompt = st.text_area('Input your prompt here')
-        OPENAI_API_KEY = st.text_input('Please enter your OpenAI API Key!',type="password")
-    #receive api key
+    OPENAI_API_KEY = st.text_input('Please enter your OpenAI API Key!',type="password")
     if(len(OPENAI_API_KEY)):
         process_openai_key(OPENAI_API_KEY)
     else:
         st.session_state.key_entered = False
+    c1,c2 = st.columns(2)
+   
+    with c1:
+        prompt = st.text_area('Input your prompt here')
+        
+        if st.button('Submit query'):
+            if prompt:
+                if(st.session_state.key_entered):
+                    process_key_entered(prompt)
+                    st.write('Prompt processed!')
+                else:
+                    st.session_state.past_answers.append("plz enter valid openai api key :)")
+    #receive api key
+    
     with c2:
         file_upload = st.file_uploader("Please upload a .pdf file!", type="pdf", accept_multiple_files=True, key=None, help=None, on_change=None, args=None, kwargs=None, disabled=False, label_visibility="visible")
         url = st.text_area('Input a link to a google drive file to be scraped! (for multiple files, separate with commas). For google drive API setup refer to documentation.')
-    
-    if len(file_upload):
-        st.session_state.file_uploaded = True
-        if file_upload != st.session_state.prev_file_upload:
-            st.session_state.data_loaded = False
-            st.session_state.prev_file_upload = file_upload
-        if not st.session_state.data_loaded:
-            load_data(file_upload)
-            st.session_state.data_loaded = True
-
-    if url:
-        if url != st.session_state.prev_url:
-            st.session_state.data_loaded = False
-            st.session_state.prev_url = url
-        if not st.session_state.data_loaded:
-            load_google_docs(url)
-            st.session_state.data_loaded = True
-    if prompt:
-        if(st.session_state.key_entered):
-            process_key_entered(prompt)
-        else:
-            st.session_state.past_answers.append("plz enter valid openai api key :)")
+        if st.button('Confirm file submission'):
+            make_qa()
+            st.session_state.file_uploaded = True
+            if len(file_upload):
+                if file_upload != st.session_state.prev_file_upload:
+                    st.session_state.data_loaded = False
+                    st.session_state.prev_file_upload = file_upload
+                if not st.session_state.data_loaded:
+                    load_data(file_upload)
+                    st.session_state.data_loaded = True
+            if url:
+                if url != st.session_state.prev_url:
+                    st.session_state.data_loaded = False
+                    st.session_state.prev_url = url
+                if not st.session_state.data_loaded:
+                    load_google_docs(url)
+                    st.session_state.data_loaded = True
+    with st.expander('Document Similarity Search'):
+            search = st.session_state.store.similarity_search_with_score(prompt) 
+            st.write(search[0][0].page_content) 
     # if len(st.session_state.past_queries) > 0:
     #     st.subheader('Past Queries and Answers')
     #     for i, (query, answer) in enumerate(zip(st.session_state.past_queries, st.session_state.past_answers)):

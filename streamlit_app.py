@@ -91,6 +91,7 @@ def process_openai_key(OPENAI_API_KEY):
     st.session_state.thekey = OPENAI_API_KEY
     st.session_state.key_entered = True
     os.environ['OPENAI_API_KEY'] = OPENAI_API_KEY
+    st.session_state.embeddings = OpenAIEmbeddings()
 def init():
     if 'past_queries' not in st.session_state:
         st.session_state.past_queries = []
@@ -109,6 +110,7 @@ def init():
         st.session_state.memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
         
 def process_key_entered(prompt):
+    make_qa()
     response=""
     if(st.session_state.file_uploaded):
         res = st.session_state.qa({"question":prompt})
@@ -117,7 +119,7 @@ def process_key_entered(prompt):
             search = st.session_state.store.similarity_search_with_score(prompt) 
             st.write(search[0][0].page_content) 
     else:
-        response = st.session_state.qa1.predict(input = prompt)
+        return
     
     st.session_state.chat_history.append("This is the user's query number {st.session_state.cnt}")
     st.session_state.chat_history.append(prompt)
@@ -153,6 +155,7 @@ def main():
         url = st.text_area('Input a link to a google drive file to be scraped! (for multiple files, separate with commas). For google drive API setup refer to documentation.')
     
     if len(file_upload):
+        st.session_state.file_uploaded = True
         if file_upload != st.session_state.prev_file_upload:
             st.session_state.data_loaded = False
             st.session_state.prev_file_upload = file_upload

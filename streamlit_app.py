@@ -93,7 +93,7 @@ def load_google_docs(urls):
 def process_openai_key(OPENAI_API_KEY):
     st.session_state.thekey = OPENAI_API_KEY
     os.environ['OPENAI_API_KEY'] = OPENAI_API_KEY
-    openai.apy_key = OPENAI_API_KEY
+    openai.api_key = OPENAI_API_KEY
     st.session_state.embeddings = OpenAIEmbeddings()
     st.session_state.key_entered = True
 

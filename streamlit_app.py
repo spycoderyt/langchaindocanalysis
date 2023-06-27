@@ -117,7 +117,10 @@ def init():
         st.session_state.cnt = 0
     if 'memory' not in st.session_state:
         st.session_state.memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
-
+    if 'qa' not in st.session_state:
+        st.session_state.qa = None
+    if 'store' not in st.session_state:
+        st.session_state.store = None
 def process_key_entered(prompt):
     response=""
     if(st.session_state.file_uploaded):
